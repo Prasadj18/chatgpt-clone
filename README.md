@@ -1,221 +1,171 @@
-# ChatGPT Clone 🤖
+# ChatClone
 
-A full-stack AI chat application inspired by ChatGPT, built with a modern frontend and backend architecture. This project allows users to have real-time conversational interactions powered by an AI language model.
+A self-hosted ChatGPT clone: React frontend, Node/Express backend, and a local LLM served through Ollama — no subscriptions, no API costs, runs entirely on your own machine.
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-green)
-![Status](https://img.shields.io/badge/status-active-brightgreen)
-
----
-
-## 📖 Table of Contents
-
-- [Features](#-features)
-- [Tech Stack](#-tech-stack)
-- [Project Structure](#-project-structure)
-- [Getting Started](#-getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-  - [Environment Variables](#environment-variables)
-  - [Running the App](#running-the-app)
-- [Screenshots](#-screenshots)
-- [API Reference](#-api-reference)
-- [Roadmap](#-roadmap)
-- [Contributing](#-contributing)
-- [License](#-license)
-- [Contact](#-contact)
+**Features**
+- 🔐 Auth — register/login with JWT, passwords hashed with bcrypt
+- 💬 Streaming responses — token-by-token, Server-Sent Events (SSE)
+- 🧠 Memory — full conversation history persisted per chat in SQLite, replayed to the model each turn for context
+- 📎 File uploads — attach `.pdf` or text files; extracted content is added as context to your message
+- 🗂️ Multiple conversations — sidebar with create/switch/delete, like ChatGPT's chat list
 
 ---
 
-## ✨ Features
+## Tech stack
 
-- 💬 Real-time AI-powered chat interface
-- 🔐 User authentication (sign up / login)
-- 🗂️ Persistent chat history
-- 🎨 Responsive, modern UI
-- ⚡ Fast and lightweight performance
-- 🌙 Dark mode support
-- 📱 Mobile-friendly design
-
----
-
-## 🛠️ Tech Stack
-
-**Frontend**
-- React.js / Next.js
-- Tailwind CSS
-- Axios
-
-**Backend**
-- Node.js
-- Express.js
-- MongoDB / PostgreSQL
-- OpenAI API
-
-**Other Tools**
-- JWT Authentication
-- dotenv for environment configuration
-- Git & GitHub for version control
+| Layer | Choice |
+|---|---|
+| Frontend | React (Vite) |
+| Backend | Node.js + Express |
+| Database | `node:sqlite` (Node's built-in SQLite — no native compilation needed) |
+| LLM | Ollama, running a local model (this project defaults to `phi3`) |
+| Auth | JWT + bcrypt |
+| Streaming | Server-Sent Events (SSE) |
+| File parsing | `multer` (upload) + `pdf-parse` (PDF text extraction) |
 
 ---
 
-## 📁 Project Structure
+## Prerequisites
+
+- **Node.js 22.5+** (Node 24.x recommended — `node:sqlite` needs 22.5 or newer)
+- **Ollama** installed — [ollama.com/download](https://ollama.com/download)
+- A pulled local model. This project is configured for **`phi3`** (~2GB, runs comfortably on 8GB RAM), but any local Ollama model works — just update `OLLAMA_MODEL` in `.env`.
+
+---
+
+## Setup
+
+### 1. Install a model in Ollama
+
+Open the Ollama app (or `ollama pull phi3` in a terminal) and pull a model. `phi3` is a good default: small, fast, and solid quality for a chat clone.
+
+> **Low on disk space?** Ollama's Settings screen has a **Model location** field with a Browse button — point it at whichever drive has more room before pulling.
+
+Leave Ollama running in the background — it serves on `http://localhost:11434` by default.
+
+### 2. Backend
+
+```powershell
+cd backend
+copy .env.example .env
+```
+
+Open `.env` and make sure `JWT_SECRET` is set to any random string (this is required — the server will crash on startup without it):
+
+```
+PORT=5000
+JWT_SECRET=replace_this_with_any_random_string
+OLLAMA_URL=http://localhost:11434
+OLLAMA_MODEL=phi3
+```
+
+Install and run:
+
+```powershell
+npm install
+npm run dev
+```
+
+You should see:
+```
+Backend running on http://localhost:5000
+```
+
+### 3. Frontend
+
+In a **separate terminal**, leaving the backend running:
+
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+You should see a local URL, typically:
+```
+➜  Local:   http://localhost:5173/
+```
+
+Open that URL in your browser, register an account, and start chatting.
+
+---
+
+## Troubleshooting
+
+**`Failed to execute 'json' on 'Response': Unexpected end of JSON input`**
+The frontend couldn't get a valid response from the backend — almost always means the backend isn't running or crashed. Check the backend terminal for errors.
+
+**Backend crashes with `Error: secretOrPrivateKey must have a value`**
+`JWT_SECRET` is missing from `backend/.env`. Make sure the file is named exactly `.env` (not `.env.example`) and has a non-empty `JWT_SECRET` value.
+
+**`npm install` fails on `better-sqlite3` with node-gyp / Visual Studio errors**
+This project uses Node's built-in `node:sqlite` module specifically to avoid this — it requires zero native compilation. If you're hitting this, make sure `backend/package.json` does **not** list `better-sqlite3` as a dependency (it should only use built-in `node:sqlite`, imported in `db.js`).
+
+**`rmdir /s /q node_modules` fails in PowerShell**
+That's Command Prompt syntax. In PowerShell, use:
+```powershell
+Remove-Item -Recurse -Force node_modules
+```
+
+**Blank white/dark screen at `localhost:5173`**
+Usually means the dev servers aren't currently running — they stop when you close the terminal. Restart both (`npm run dev` in `backend`, then in `frontend`) and refresh. If it's still blank, open the browser console (F12 → Console tab) to see the actual JS error.
+
+**Model download shows a subscription/403 error**
+That means you selected a `:cloud` model from Ollama's dropdown (e.g. `glm-5.2:cloud`) rather than a local one. Cloud models need a paid Ollama subscription. Switch the model selector to a local (non-`:cloud`) model instead.
+
+**Low RAM (8GB) — which model to use?**
+Stick to small models: `phi3` (~2GB) or `gemma2:2b`. A 12B+ parameter model will fit on disk but likely runs slowly and strains RAM alongside your OS, browser, and dev servers.
+
+---
+
+## How it works
+
+- **Auth**: `bcryptjs` hashes passwords on register; `jsonwebtoken` issues a 7-day token on login/register, stored in the browser's `localStorage`, sent as `Authorization: Bearer <token>` on every request.
+- **Streaming**: the backend calls Ollama's `/api/chat` endpoint with `stream: true`, reads the response as a stream, and forwards each token to the frontend over SSE. The frontend appends tokens live to the last message as they arrive.
+- **Memory**: every message (user and assistant) is saved to SQLite. On each new message, the full conversation history for that chat is pulled from the database and sent to Ollama, so the model has full context of the conversation so far.
+- **File uploads**: `multer` handles the upload. PDFs go through `pdf-parse` to extract text; plain text files are read directly. Extracted text is capped at 8,000 characters and appended to your message as context before it reaches the model.
+
+---
+
+## Project structure
 
 ```
 chatgpt-clone/
 ├── backend/
-│   ├── controllers/
-│   ├── models/
+│   ├── server.js              Express app entry point
+│   ├── db.js                  SQLite schema (users, conversations, messages)
+│   ├── .env.example           Copy to .env and fill in
 │   ├── routes/
-│   ├── middleware/
-│   ├── .env.example
-│   ├── server.js
-│   └── package.json
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── hooks/
-│   │   └── App.jsx
-│   ├── public/
-│   └── package.json
-├── .gitignore
-└── README.md
+│   │   ├── auth.js             POST /register, /login
+│   │   ├── chat.js             conversations CRUD + SSE message streaming
+│   │   └── upload.js           file upload + text extraction
+│   ├── services/
+│   │   └── ollama.js           streaming client for Ollama's /api/chat
+│   └── middleware/
+│       └── auth.js             JWT verification
+│
+└── frontend/
+    ├── index.html
+    ├── vite.config.js          proxies /api to localhost:5000
+    └── src/
+        ├── App.jsx              top-level layout, auth gate
+        ├── api.js                all fetch calls to the backend
+        ├── styles.css            dark theme, ChatGPT-style layout
+        ├── context/
+        │   └── AuthContext.jsx    login state, token storage
+        └── components/
+            ├── Login.jsx           login/register form
+            ├── Sidebar.jsx         conversation list
+            ├── ChatWindow.jsx      message list, streaming state
+            └── MessageInput.jsx    text box + file attach button
 ```
 
 ---
 
-## 🚀 Getting Started
+## Extending this project
 
-Follow these steps to run the project locally.
-
-### Prerequisites
-
-Make sure you have the following installed:
-
-- [Node.js](https://nodejs.org/) (v18 or higher)
-- [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
-- [MongoDB](https://www.mongodb.com/) (if using a local database)
-- An [OpenAI API key](https://platform.openai.com/api-keys)
-
-### Installation
-
-1. **Clone the repository**
-
-   ```bash
-   git clone https://github.com/your-username/chatgpt-clone.git
-   cd chatgpt-clone
-   ```
-
-2. **Install backend dependencies**
-
-   ```bash
-   cd backend
-   npm install
-   ```
-
-3. **Install frontend dependencies**
-
-   ```bash
-   cd ../frontend
-   npm install
-   ```
-
-### Environment Variables
-
-Create a `.env` file inside the `backend` folder and add the following:
-
-```env
-PORT=5000
-MONGODB_URI=your_mongodb_connection_string
-OPENAI_API_KEY=your_openai_api_key
-JWT_SECRET=your_jwt_secret_key
-```
-
-If your frontend also needs environment variables, create a `.env.local` file inside the `frontend` folder:
-
-```env
-NEXT_PUBLIC_API_URL=http://localhost:5000
-```
-
-> ⚠️ **Never commit your `.env` files.** They are already excluded via `.gitignore`.
-
-### Running the App
-
-Open two terminal windows — one for the backend, one for the frontend.
-
-**Terminal 1 — Backend**
-```bash
-cd backend
-npm run dev
-```
-
-**Terminal 2 — Frontend**
-```bash
-cd frontend
-npm run dev
-```
-
-The app should now be running at:
-- Frontend: `http://localhost:3000`
-- Backend: `http://localhost:5000`
-
----
-
-## 📸 Screenshots
-
-| Chat Interface | Dark Mode |
-<img width="1917" height="1028" alt="image" src="https://github.com/user-attachments/assets/0c421d7d-11a0-4f6e-9e5f-f468e2ff585c" />
-<img width="1912" height="1030" alt="Screenshot 2026-07-25 002923" src="https://github.com/user-attachments/assets/dcf5cdaf-ce9e-4638-8127-5cd4d89e31da" />
-
-
----
-
-## 📡 API Reference
-
-| Method | Endpoint             | Description                  |
-|--------|-----------------------|-------------------------------|
-| POST   | `/api/auth/register`  | Register a new user          |
-| POST   | `/api/auth/login`     | Log in an existing user      |
-| POST   | `/api/chat`            | Send a message to the AI     |
-| GET    | `/api/chat/history`    | Fetch user's chat history     |
-
----
-
-## 🗺️ Roadmap
-
-- [ ] Voice input support
-- [ ] File/image upload in chat
-- [ ] Multi-language support
-- [ ] Deploy to production (Vercel + Render/Railway)
-- [ ] Add unit and integration tests
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! To contribute:
-
-1. Fork the repository
-2. Create a new branch (`git checkout -b feature/your-feature`)
-3. Commit your changes (`git commit -m "Add your feature"`)
-4. Push to the branch (`git push origin feature/your-feature`)
-5. Open a Pull Request
-
----
-
-## 📄 License
-
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
-
----
-
-## 📬 Contact
-
-**Your Name**
-- GitHub: [@your-username](https://github.com/your-username)
-- Email: your.email@example.com
-
----
-
-⭐️ If you found this project helpful, consider giving it a star on GitHub!
+- **Markdown/code rendering** — add `react-markdown` + `react-syntax-highlighter` in `ChatWindow.jsx` so code blocks and formatting render properly instead of as plain text.
+- **Stop generating button** — abort the SSE fetch stream mid-response.
+- **Model picker in the UI** — send a `model` field per-request instead of a fixed `.env` value, so you can switch models without restarting the backend.
+- **Swap the LLM backend** — replace `services/ollama.js` with a call to the Anthropic API (or any other provider) if you'd rather not run a model locally. The SSE streaming contract to the frontend stays the same either way.
+- **Multi-device deployment** — swap `node:sqlite` for Postgres if you outgrow a single-file local database.
