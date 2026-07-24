@@ -1,538 +1,222 @@
-# ChatClone
+# ChatGPT Clone 🤖
 
-A full-stack ChatGPT-inspired AI chat application built with React, Node.js, Express, SQLite, and Ollama.
+A full-stack AI chat application inspired by ChatGPT, built with a modern frontend and backend architecture. This project allows users to have real-time conversational interactions powered by an AI language model.
 
-ChatClone provides a conversational AI experience with user authentication, real-time streaming responses, persistent conversation history, and PDF/text file uploads that can be used as contextual information during conversations.
-
----
-
-## Features
-
-- 🤖 AI-powered conversations using locally hosted Ollama models
-- 🔐 User registration and login
-- 🔑 JWT-based authentication
-- 🔒 Password hashing with bcryptjs
-- 💬 Persistent conversations and message history
-- 🧠 Conversation memory using SQLite
-- ⚡ Real-time AI response streaming using Server-Sent Events (SSE)
-- 📄 PDF and text file uploads
-- 📚 Uploaded file content used as context for AI responses
-- 👤 User-specific conversations
-- 📱 Responsive chat interface
-- 🛡️ Protected backend API routes
-- 🖥️ Separate React frontend and Node.js backend
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-green)
+![Status](https://img.shields.io/badge/status-active-brightgreen)
 
 ---
 
-## Demo
+## 📖 Table of Contents
 
-> Add your deployed application URL here after deployment.
-
-**Live Demo:** Coming Soon
+- [Features](#-features)
+- [Tech Stack](#-tech-stack)
+- [Project Structure](#-project-structure)
+- [Getting Started](#-getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Environment Variables](#environment-variables)
+  - [Running the App](#running-the-app)
+- [Screenshots](#-screenshots)
+- [API Reference](#-api-reference)
+- [Roadmap](#-roadmap)
+- [Contributing](#-contributing)
+- [License](#-license)
+- [Contact](#-contact)
 
 ---
 
-## Screenshots
+## ✨ Features
 
-> Add screenshots of your application here after deployment.
+- 💬 Real-time AI-powered chat interface
+- 🔐 User authentication (sign up / login)
+- 🗂️ Persistent chat history
+- 🎨 Responsive, modern UI
+- ⚡ Fast and lightweight performance
+- 🌙 Dark mode support
+- 📱 Mobile-friendly design
 
-Example:
+---
 
-```text
-screenshots/
-├── login.png
-├── chat.png
-├── sidebar.png
-└── file-upload.png
+## 🛠️ Tech Stack
 
-You can add screenshots to this README using:
+**Frontend**
+- React.js / Next.js
+- Tailwind CSS
+- Axios
 
-![ChatClone Chat Interface](screenshots/chat.png)
-Tech Stack
-Frontend
-React
-Vite
-JavaScript
-CSS
-Fetch API
-Backend
-Node.js
-Express.js
-JSON Web Tokens (JWT)
-bcryptjs
-Multer
-Server-Sent Events (SSE)
-Database
-SQLite
-AI
-Ollama
-Llama 3.1
-File Processing
-PDF text extraction
-Plain text file processing
-Development Tools
-Git
-GitHub
-VS Code
-npm
-Project Architecture
-                    ┌──────────────────────┐
-                    │      User / Browser  │
-                    └──────────┬───────────┘
-                               │
-                               ▼
-                    ┌──────────────────────┐
-                    │   React + Vite       │
-                    │      Frontend        │
-                    └──────────┬───────────┘
-                               │
-                     HTTP / SSE Requests
-                               │
-                               ▼
-                    ┌──────────────────────┐
-                    │   Node.js + Express  │
-                    │       Backend        │
-                    └───────┬───────┬──────┘
-                            │       │
-              ┌─────────────┘       └──────────────┐
-              ▼                                    ▼
-     ┌─────────────────┐                  ┌─────────────────┐
-     │     SQLite      │                  │     Ollama      │
-     │ Users, Chats,   │                  │   Local LLM     │
-     │    Messages     │                  │  AI Responses   │
-     └─────────────────┘                  └─────────────────┘
-Project Structure
-ChatClone/
-│
+**Backend**
+- Node.js
+- Express.js
+- MongoDB / PostgreSQL
+- OpenAI API
+
+**Other Tools**
+- JWT Authentication
+- dotenv for environment configuration
+- Git & GitHub for version control
+
+---
+
+## 📁 Project Structure
+
+```
+chatgpt-clone/
 ├── backend/
-│   ├── middleware/
-│   │   └── auth.js
-│   │
+│   ├── controllers/
+│   ├── models/
 │   ├── routes/
-│   │   ├── auth.js
-│   │   ├── chat.js
-│   │   └── upload.js
-│   │
-│   ├── services/
-│   │   └── ollama.js
-│   │
+│   ├── middleware/
 │   ├── .env.example
-│   ├── db.js
-│   ├── package.json
-│   ├── package-lock.json
-│   └── server.js
-│
+│   ├── server.js
+│   └── package.json
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── ChatWindow.jsx
-│   │   │   ├── Login.jsx
-│   │   │   ├── MessageInput.jsx
-│   │   │   └── Sidebar.jsx
-│   │   │
-│   │   ├── context/
-│   │   │   └── AuthContext.jsx
-│   │   │
-│   │   ├── App.jsx
-│   │   ├── api.js
-│   │   ├── main.jsx
-│   │   └── styles.css
-│   │
-│   ├── index.html
-│   ├── package.json
-│   ├── package-lock.json
-│   └── vite.config.js
-│
+│   │   ├── pages/
+│   │   ├── hooks/
+│   │   └── App.jsx
+│   ├── public/
+│   └── package.json
 ├── .gitignore
 └── README.md
-Prerequisites
+```
 
-Before running ChatClone locally, install the following:
+---
 
-Node.js 18+ recommended
-npm
-Git
-Ollama
+## 🚀 Getting Started
 
-Download Ollama from:
+Follow these steps to run the project locally.
 
-https://ollama.com/download
+### Prerequisites
 
-Verify Node.js installation:
+Make sure you have the following installed:
 
-node --version
+- [Node.js](https://nodejs.org/) (v18 or higher)
+- [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
+- [MongoDB](https://www.mongodb.com/) (if using a local database)
+- An [OpenAI API key](https://platform.openai.com/api-keys)
 
-Verify npm:
+### Installation
 
-npm --version
+1. **Clone the repository**
 
-Verify Ollama:
+   ```bash
+   git clone https://github.com/your-username/chatgpt-clone.git
+   cd chatgpt-clone
+   ```
 
-ollama --version
-Ollama Setup
+2. **Install backend dependencies**
 
-ChatClone uses Ollama to run the AI model locally.
+   ```bash
+   cd backend
+   npm install
+   ```
 
-Pull the default model:
+3. **Install frontend dependencies**
 
-ollama pull llama3.1
+   ```bash
+   cd ../frontend
+   npm install
+   ```
 
-Start the Ollama service:
+### Environment Variables
 
-ollama serve
+Create a `.env` file inside the `backend` folder and add the following:
 
-By default, Ollama runs at:
-
-http://localhost:11434
-
-You can use another Ollama-supported model, such as:
-
-Llama 3.1
-Mistral
-Phi
-Gemma
-
-Make sure the model configured in your backend environment matches the model installed in Ollama.
-
-Backend Setup
-
-Open a terminal in the backend directory:
-
-cd backend
-
-Install dependencies:
-
-npm install
-
-Create your environment file.
-
-Windows PowerShell
-Copy-Item .env.example .env
-macOS / Linux
-cp .env.example .env
-
-Open the .env file and configure the required environment variables.
-
-Example:
-
+```env
 PORT=5000
-JWT_SECRET=replace_with_a_strong_random_secret
-OLLAMA_URL=http://localhost:11434
-OLLAMA_MODEL=llama3.1
+MONGODB_URI=your_mongodb_connection_string
+OPENAI_API_KEY=your_openai_api_key
+JWT_SECRET=your_jwt_secret_key
+```
 
-Never commit your .env file to GitHub.
+If your frontend also needs environment variables, create a `.env.local` file inside the `frontend` folder:
 
-Start the backend in development mode:
+```env
+NEXT_PUBLIC_API_URL=http://localhost:5000
+```
 
-npm run dev
+> ⚠️ **Never commit your `.env` files.** They are already excluded via `.gitignore`.
 
-The backend should run on:
+### Running the App
 
-http://localhost:5000
-Frontend Setup
+Open two terminal windows — one for the backend, one for the frontend.
 
-Open a new terminal:
-
-cd frontend
-
-Install dependencies:
-
-npm install
-
-Start the Vite development server:
-
-npm run dev
-
-The frontend should be available at:
-
-http://localhost:5173
-
-Open the URL in your browser.
-
-Running the Application
-
-To run the complete application locally, you need three services running:
-
-Terminal 1 — Ollama
-ollama serve
-Terminal 2 — Backend
+**Terminal 1 — Backend**
+```bash
 cd backend
 npm run dev
-Terminal 3 — Frontend
+```
+
+**Terminal 2 — Frontend**
+```bash
 cd frontend
 npm run dev
+```
 
-Then open:
+The app should now be running at:
+- Frontend: `http://localhost:3000`
+- Backend: `http://localhost:5000`
 
-http://localhost:5173
+---
 
-Register a new account and start chatting.
+## 📸 Screenshots
 
-How ChatClone Works
-1. Authentication
+> Add screenshots or a demo GIF of your app here.
 
-Users can register and log in through the React frontend.
+| Chat Interface | Dark Mode |
+|-----------------|-----------|
+| _screenshot_ | _screenshot_ |
 
-The backend:
+---
 
-Receives the user's credentials.
-Hashes passwords using bcryptjs.
-Stores user information in SQLite.
-Generates a JWT after successful authentication.
-Returns the token to the frontend.
+## 📡 API Reference
 
-The frontend stores the authentication token and sends it with protected API requests using:
+| Method | Endpoint             | Description                  |
+|--------|-----------------------|-------------------------------|
+| POST   | `/api/auth/register`  | Register a new user          |
+| POST   | `/api/auth/login`     | Log in an existing user      |
+| POST   | `/api/chat`            | Send a message to the AI     |
+| GET    | `/api/chat/history`    | Fetch user's chat history     |
 
-Authorization: Bearer <token>
+---
 
-Protected backend routes verify the JWT using authentication middleware.
+## 🗺️ Roadmap
 
-2. AI Chat
+- [ ] Voice input support
+- [ ] File/image upload in chat
+- [ ] Multi-language support
+- [ ] Deploy to production (Vercel + Render/Railway)
+- [ ] Add unit and integration tests
 
-When a user sends a message:
+---
 
-User
-  ↓
-React Frontend
-  ↓
-Express Backend
-  ↓
-Conversation History from SQLite
-  ↓
-Ollama
-  ↓
-AI Model
+## 🤝 Contributing
 
-The backend retrieves the relevant conversation history and sends it to the Ollama model.
+Contributions are welcome! To contribute:
 
-The generated response is then streamed back to the frontend.
+1. Fork the repository
+2. Create a new branch (`git checkout -b feature/your-feature`)
+3. Commit your changes (`git commit -m "Add your feature"`)
+4. Push to the branch (`git push origin feature/your-feature`)
+5. Open a Pull Request
 
-3. Real-Time Streaming
+---
 
-ChatClone uses Server-Sent Events (SSE) to stream AI responses.
+## 📄 License
 
-Instead of waiting for the entire response:
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
 
-"Hello! How can I help you today?"
+---
 
-The frontend receives the response progressively:
+## 📬 Contact
 
-Hello
-Hello!
-Hello! How
-Hello! How can
-Hello! How can I
-...
+**Your Name**
+- GitHub: [@your-username](https://github.com/your-username)
+- Email: your.email@example.com
 
-This creates a more responsive ChatGPT-style user experience.
+---
 
-4. Conversation Memory
-
-Chat messages are persisted in SQLite.
-
-The database stores information related to:
-
-Users
-Conversations
-Messages
-
-When a user continues an existing conversation, the backend retrieves the previous messages and sends the conversation context to Ollama.
-
-This allows the AI model to maintain context across multiple messages.
-
-5. File Uploads
-
-Users can upload supported files such as:
-
-PDF files
-Plain text files
-
-The backend processes the uploaded file and extracts its text content.
-
-The extracted content is then added to the user's message as context before the request is sent to Ollama.
-
-For example:
-
-User uploads PDF
-        ↓
-Backend extracts text
-        ↓
-Text is processed
-        ↓
-Relevant content is added as context
-        ↓
-Prompt sent to Ollama
-        ↓
-AI generates response
-
-The extracted file context is limited to prevent excessively large prompts.
-
-API Overview
-
-The backend provides API routes for authentication, conversations, messages, and file uploads.
-
-Authentication
-POST /api/auth/register
-POST /api/auth/login
-Chat and Conversations
-GET  /api/chat/conversations
-POST /api/chat/conversations
-GET  /api/chat/conversations/:id/messages
-POST /api/chat/conversations/:id/messages
-File Uploads
-POST /api/upload
-
-API routes may require JWT authentication depending on the endpoint.
-
-Database
-
-ChatClone currently uses SQLite for local development.
-
-The database stores:
-
-Users
-  │
-  └── Conversations
-          │
-          └── Messages
-
-SQLite is convenient for local development because it requires minimal configuration.
-
-For production deployment with multiple backend instances, a managed database such as PostgreSQL would be a better option.
-
-Environment Variables
-
-The backend uses environment variables for configuration.
-
-Example:
-
-PORT=5000
-JWT_SECRET=your_secret_here
-OLLAMA_URL=http://localhost:11434
-OLLAMA_MODEL=llama3.1
-Important
-
-Never commit secrets directly to GitHub.
-
-The following files should remain local:
-
-.env
-
-Use the provided template instead:
-
-.env.example
-Security
-
-ChatClone follows basic security practices including:
-
-Password hashing using bcryptjs
-JWT-based authentication
-Protected API routes
-Environment variables for secrets
-.gitignore configuration to prevent accidental secret commits
-
-For production deployment, additional security improvements should be considered, including:
-
-HTTPS
-Secure HTTP-only cookies
-CSRF protection
-Rate limiting
-Input validation
-File type and file size restrictions
-Production database security
-Secure CORS configuration
-Strong production JWT secrets
-Deployment
-
-The application is designed with a separate frontend and backend architecture.
-
-A typical production deployment can use:
-
-                 Internet
-                    │
-                    ▼
-          ┌──────────────────┐
-          │ React Frontend   │
-          │ Static Hosting   │
-          └────────┬─────────┘
-                   │
-                   ▼
-          ┌──────────────────┐
-          │ Node/Express API │
-          │ Backend Hosting  │
-          └───────┬─────┬────┘
-                  │     │
-                  ▼     ▼
-             Database   AI Provider
-
-For production deployment, the following changes may be required:
-
-Configure frontend API URL
-Configure production CORS
-Configure production environment variables
-Replace local SQLite with a managed database if required
-Configure a production AI provider or remotely hosted Ollama instance
-Configure HTTPS
-Configure persistent file storage
-Deploy frontend and backend separately if required
-
-The current development configuration uses Ollama running locally at localhost:11434. A production deployment requires a publicly accessible or hosted AI inference solution.
-
-Future Improvements
-
-Planned improvements include:
-
- Deploy frontend and backend
- Add production AI inference
- Replace SQLite with PostgreSQL
- Add Markdown rendering
- Add syntax highlighting for code responses
- Add "Stop Generating" functionality
- Add AI model selection
- Add conversation renaming
- Add conversation deletion
- Add message regeneration
- Add dark/light theme support
- Add improved mobile responsiveness
- Add rate limiting
- Add stronger production security
- Add automated testing
- Add CI/CD pipeline
-Learning Outcomes
-
-This project demonstrates practical experience with:
-
-Full-stack web development
-React application architecture
-REST API development
-Node.js and Express
-JWT authentication
-Password hashing
-Database design
-SQLite
-Server-Sent Events
-Real-time response streaming
-Local Large Language Models
-Ollama integration
-File upload handling
-PDF text extraction
-Context-aware AI applications
-Git and GitHub
-Production deployment concepts
-License
-
-This project is intended for educational and portfolio purposes.
-
-Add your preferred license here if you plan to distribute the project publicly.
-
-Author
-
-Prasada
-
-B.E. Information Science and Engineering Student
-
-GitHub:
-https://github.com/Prasadj18
-
-LinkedIn:
-https://www.linkedin.com/in/prasad-jahagirdar-5417032b4
+⭐️ If you found this project helpful, consider giving it a star on GitHub!
