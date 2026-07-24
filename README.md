@@ -167,8 +167,9 @@ The app should now be running at:
 > Add screenshots or a demo GIF of your app here.
 
 | Chat Interface | Dark Mode |
-|-----------------|-----------|
-| _screenshot_ | _screenshot_ |
+<img width="1917" height="1028" alt="image" src="https://github.com/user-attachments/assets/0c421d7d-11a0-4f6e-9e5f-f468e2ff585c" />
+<img width="1912" height="1030" alt="Screenshot 2026-07-25 002923" src="https://github.com/user-attachments/assets/dcf5cdaf-ce9e-4638-8127-5cd4d89e31da" />
+
 
 ---
 
