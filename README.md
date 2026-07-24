@@ -536,11 +536,3 @@ https://github.com/Prasadj18
 
 LinkedIn:
 https://www.linkedin.com/in/prasad-jahagirdar-5417032b4
-
-
-### One thing I deliberately left as `Coming Soon`
-
-I didn't put a fake live demo URL because your application isn't deployed yet. Once we deploy it, we can update:
-
-```markdown
-**Live Demo:** Coming Soon
